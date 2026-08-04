@@ -1,1 +1,66 @@
-/home/prune/projects/packages/nt/nt
+#!/usr/bin/env zsh
+set -euo pipefail
+: "${NOTES_DIR:=$HOME/notes}"
+: "${EDITOR:=vim}"
+mkdir -p "$NOTES_DIR"
+nt_open() {
+	local name="${1:-}"
+	if [[ -z "$name" ]]; then
+		echo "usage: nt open <file>"
+		return 1
+	fi
+	local file="$NOTES_DIR/${name%.md}.md"
+	"$EDITOR" "$file"
+}
+nt_list() {
+	local files=("$NOTES_DIR"/*.md(N:t:r))
+	(( ${#files} )) && print -l $files || echo "notes not found"
+}
+nt_search() {
+	if [[ -z "${1:-}" ]]; then
+		echo "usage: nt search <query>"
+		return 1
+	fi
+	command -v rg >/dev/null || { echo "ripgrep required"; return 1; }
+	rg "$1" "$NOTES_DIR"
+}
+nt_journal() {
+	local file="$NOTES_DIR/journal-$(date +%F).md"
+	"$EDITOR" "$file"
+}
+nt_delete() {
+	local name="${1:-}"
+	if [[ -z "$name" ]]; then
+		echo "usage: nt delete <file>"
+		return 1
+	fi
+	local file="$NOTES_DIR/${name%.md}.md"
+	if [[ -f "$file" ]]; then
+		read "?delete '$name'? [y/N] " confirm
+		[[ "$confirm" == y ]] && rm "$file"
+	else
+		echo "note not found"
+	fi
+}
+nt_help() {
+	cat <<EOF
+nt - minimal terminal notes
+
+commands:
+	nt open <file>      create or open a note
+	nt list             list notes
+	nt search <query>   search inside notes
+	nt delete <file>    delete a note
+	nt journal          open today's journal
+	nt help             show this message
+EOF
+}
+case "${1:-}" in
+	open) shift; nt_open "$@" ;;
+	list) nt_list ;;
+	search) shift; nt_search "$@" ;;
+	journal) nt_journal ;;
+	delete) shift; nt_delete "$@" ;;
+	help|"") nt_help ;;
+	*) echo "unknown command: $1"; nt_help ;;
+esac
