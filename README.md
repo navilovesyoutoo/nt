@@ -1,5 +1,5 @@
 # nt
-simple note app for cli
+simple note app for cli <br />
 
 hii! <br />
 i made this little note-taking script for quick notes when i need them <br />
