@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 set -euo pipefail
 : "${NOTES_DIR:=$HOME/notes}"
-: "${EDITOR:=vim}"
+: "${EDITOR:=nvim}"
 mkdir -p "$NOTES_DIR"
 nt_open() {
 	local name="${1:-}"
